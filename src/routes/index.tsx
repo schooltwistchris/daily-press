@@ -66,10 +66,12 @@ const SECTIONS: Section[] = [
 ];
 
 function Index() {
+  const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
   return (
     <main className="min-h-screen">
       <Hero />
-      <Mockup />
+      <Configurator config={config} setConfig={setConfig} />
+      <Mockup config={config} />
       <HowItWorks />
       <Signup />
       <Footer />
@@ -97,50 +99,52 @@ function Hero() {
   );
 }
 
-function Mockup() {
+function Mockup({ config }: { config: Config }) {
+  const enabledSections = config.sections.filter((s) => s.enabled);
+  const pubName = (config.pubName || "Daily Press").toUpperCase();
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  const cityState = [config.city, config.state].filter(Boolean).join(", ");
   return (
     <section className="mx-auto max-w-5xl px-6 pb-24">
       <div className="bg-paper px-6 py-10 md:px-14 md:py-16 shadow-[0_30px_60px_-20px_rgba(40,30,15,0.18),0_8px_20px_-8px_rgba(40,30,15,0.12)] border border-border/40">
         <div className="text-center">
           <div className="h-px bg-ink/80" />
           <h2 className="font-serif font-black tracking-tight text-4xl sm:text-5xl md:text-7xl py-3 text-ink">
-            MEDFORD MERCURY
+            {pubName}
           </h2>
           <div className="h-px bg-ink/80" />
-          <p className="font-serif italic mt-3 text-muted-foreground">
-            Your daily local read
-          </p>
-          <p className="mt-2 text-xs tracking-wide text-muted-foreground">
-            Saturday, May 23, 2026 - Medford, Massachusetts
-          </p>
+          <p className="font-serif italic mt-3 text-muted-foreground">{config.tagline || "Your daily local read"}</p>
+          <p className="mt-2 text-xs tracking-wide text-muted-foreground">{today} - {cityState}</p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-x-10">
-          {SECTIONS.map((s, i) => (
-            <div
-              key={s.label}
-              className={`py-6 ${i < SECTIONS.length - (SECTIONS.length % 2 === 0 ? 2 : 1) ? "border-b border-border/60" : ""} ${i % 2 === 1 ? "md:border-l md:border-border/60 md:pl-10" : ""}`}
-            >
-              <p className="small-caps text-accent mb-4">{s.label}</p>
-              <div className="space-y-5">
-                {s.items.map((it) => (
-                  <article key={it.headline}>
-                    <h3 className="font-serif text-xl md:text-2xl leading-snug text-ink">
-                      {it.headline}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {it.body}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        {enabledSections.length === 0 ? (
+          <p className="mt-16 text-center text-sm text-muted-foreground italic">Toggle a section on above to see today's edition.</p>
+        ) : (
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-x-10">
+            {enabledSections.map((s, i) => {
+              const template = SECTIONS.find((t) => t.label === s.templateLabel);
+              if (!template) return null;
+              const isLastRow = i >= enabledSections.length - (enabledSections.length % 2 === 0 ? 2 : 1);
+              return (
+                <div key={s.id} className={`py-6 ${!isLastRow ? "border-b border-border/60" : ""} ${i % 2 === 1 ? "md:border-l md:border-border/60 md:pl-10" : ""}`}>
+                  <p className="small-caps text-accent mb-4">{s.label || template.label}</p>
+                  <div className="space-y-5">
+                    {template.items.map((it, j) => (
+                      <article key={j}>
+                        <h3 className="font-serif text-xl md:text-2xl leading-snug text-ink">{interpolate(it.headline, config)}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{interpolate(it.body, config)}</p>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-8 h-px bg-border" />
         <p className="font-serif italic text-center text-xs text-muted-foreground mt-4">
-          Edition May 23, 2026 - published by Medford Mercury
+          Edition {today} - published by {config.pubName || "Daily Press"}
         </p>
       </div>
     </section>
@@ -194,4 +198,86 @@ function Footer() {
     </footer>
   );
 }
+type Config = {
+  pubName: string;
+  tagline: string;
+  city: string;
+  state: string;
+  mayor: string;
+  street: string;
+  highSchool: string;
+  sections: { id: string; templateLabel: string; label: string; enabled: boolean }[];
+};
+
+const DEFAULT_CONFIG: Config = {
+  pubName: "Medford Mercury",
+  tagline: "Your daily local read",
+  city: "Medford",
+  state: "Massachusetts",
+  mayor: "Lungo-Koehn",
+  street: "Main Street",
+  highSchool: "Medford High",
+  sections: SECTIONS.map((s, i) => ({ id: String(i), templateLabel: s.label, label: s.label, enabled: true })),
+};
+
+function interpolate(text: string, config: Config): string {
+  const highSchool = config.highSchool.trim() || (config.city || "Town") + " High";
+  return text
+    .replaceAll("Medford City Council", (config.city || "Town") + " City Council")
+    .replaceAll("Mayor Lungo-Koehn", "Mayor " + (config.mayor || "the mayor"))
+    .replaceAll("the mayor said", (config.mayor || "the mayor") + " said")
+    .replaceAll("Main Street", config.street || "Main Street")
+    .replaceAll("Medford High", highSchool)
+    .replaceAll("Faces of Medford", "Faces of " + (config.city || "Town"))
+    .replaceAll("Medford", config.city || "Town");
+}
+
+function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Config) => void }) {
+  const update = (patch: Partial<Config>) => setConfig({ ...config, ...patch });
+  const updateSection = (id: string, patch: Partial<{ label: string; enabled: boolean }>) =>
+    setConfig({ ...config, sections: config.sections.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
+
+  return (
+    <section id="configurator" className="mx-auto max-w-5xl px-6 pb-12 border-t border-border pt-16">
+      <p className="small-caps text-accent">Build your edition</p>
+      <h2 className="font-serif text-4xl md:text-5xl mt-4 tracking-tight">Design your paper.</h2>
+      <p className="mt-4 text-muted-foreground text-lg max-w-2xl">Change anything below. The mockup updates as you type.</p>
+
+      <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+        <Field label="Publication name" value={config.pubName} onChange={(v) => update({ pubName: v })} />
+        <Field label="Tagline" value={config.tagline} onChange={(v) => update({ tagline: v })} />
+        <Field label="City" value={config.city} onChange={(v) => update({ city: v })} />
+        <Field label="State" value={config.state} onChange={(v) => update({ state: v })} />
+        <Field label="Mayor's last name" hint="Optional" value={config.mayor} onChange={(v) => update({ mayor: v })} />
+        <Field label="Main street name" hint="Optional" value={config.street} onChange={(v) => update({ street: v })} />
+        <Field label="High school name" hint="Optional" value={config.highSchool} onChange={(v) => update({ highSchool: v })} />
+      </div>
+
+      <div className="mt-10">
+        <p className="small-caps text-accent mb-4">Sections</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {config.sections.map((s) => (
+            <div key={s.id} className="flex items-center gap-3 border border-border rounded-sm px-4 py-3 bg-paper">
+              <input type="checkbox" checked={s.enabled} onChange={(e) => updateSection(s.id, { enabled: e.target.checked })} className="h-4 w-4" />
+              <input type="text" value={s.label} onChange={(e) => updateSection(s.id, { label: e.target.value })} disabled={!s.enabled} className="flex-1 bg-transparent text-sm outline-none disabled:opacity-50" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Field({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-medium text-foreground mb-1.5">
+        {label}
+        {hint ? <span className="ml-2 text-xs font-normal text-muted-foreground">{hint}</span> : null}
+      </span>
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-sm border border-border bg-paper px-4 py-2.5 text-sm outline-none focus:border-accent transition" />
+    </label>
+  );
+}
+
 
