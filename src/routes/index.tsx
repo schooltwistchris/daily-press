@@ -1,31 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+iimport { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
-  head: () => ({
-    meta: [
-      { title: "Daily Press — Hyperlocal newspapers, on autopilot" },
-      {
-        name: "description",
-        content:
-          "Daily Press is the framework powering AI-generated hyperlocal news. Design your masthead, pick your beats, deploy a daily edition that writes itself.",
-      },
-      { property: "og:title", content: "Daily Press" },
-      {
-        property: "og:description",
-        content: "A framework for launching hyperlocal daily HTML newspapers.",
-      },
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&display=swap",
-      },
-    ],
-  }),
 });
 
 type Section = {
