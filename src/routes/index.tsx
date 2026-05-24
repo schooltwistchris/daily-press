@@ -65,6 +65,28 @@ const SECTIONS: Section[] = [
   },
 ];
 
+type Config = {
+  pubName: string;
+  tagline: string;
+  city: string;
+  state: string;
+  mayor: string;
+  street: string;
+  highSchool: string;
+  sections: { id: string; templateLabel: string; label: string; enabled: boolean }[];
+};
+
+const DEFAULT_CONFIG: Config = {
+  pubName: "Medford Mercury",
+  tagline: "Your daily local read",
+  city: "Medford",
+  state: "Massachusetts",
+  mayor: "Lungo-Koehn",
+  street: "Main Street",
+  highSchool: "Medford High",
+  sections: SECTIONS.map((s, i) => ({ id: String(i), templateLabel: s.label, label: s.label, enabled: true })),
+};
+
 function Index() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
   return (
@@ -198,27 +220,6 @@ function Footer() {
     </footer>
   );
 }
-type Config = {
-  pubName: string;
-  tagline: string;
-  city: string;
-  state: string;
-  mayor: string;
-  street: string;
-  highSchool: string;
-  sections: { id: string; templateLabel: string; label: string; enabled: boolean }[];
-};
-
-const DEFAULT_CONFIG: Config = {
-  pubName: "Medford Mercury",
-  tagline: "Your daily local read",
-  city: "Medford",
-  state: "Massachusetts",
-  mayor: "Lungo-Koehn",
-  street: "Main Street",
-  highSchool: "Medford High",
-  sections: SECTIONS.map((s, i) => ({ id: String(i), templateLabel: s.label, label: s.label, enabled: true })),
-};
 
 function interpolate(text: string, config: Config): string {
   const highSchool = config.highSchool.trim() || (config.city || "Town") + " High";
