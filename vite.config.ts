@@ -12,4 +12,26 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    plugins: [
+      {
+        name: "daily-press-injected-head-scripts-fallback",
+        enforce: "pre",
+        resolveId(id) {
+          if (id === "tanstack-start-injected-head-scripts:v") {
+            return "\0tanstack-start-injected-head-scripts:v";
+          }
+
+          return undefined;
+        },
+        load(id) {
+          if (id === "\0tanstack-start-injected-head-scripts:v") {
+            return "export const injectedHeadScripts = undefined;";
+          }
+
+          return undefined;
+        },
+      },
+    ],
+  },
 });
