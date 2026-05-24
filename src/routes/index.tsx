@@ -290,7 +290,19 @@ function interpolate(text: string, config: Config): string {
     .replaceAll("Medford", config.city || "Town");
 }
 
-function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Config) => void }) {
+function Configurator({
+  config,
+  setConfig,
+  onGenerate,
+  loading,
+  error,
+}: {
+  config: Config;
+  setConfig: (c: Config) => void;
+  onGenerate: () => void;
+  loading: boolean;
+  error: string | null;
+}) {
   const update = (patch: Partial<Config>) => setConfig({ ...config, ...patch });
   const updateSection = (id: string, patch: Partial<{ label: string; enabled: boolean }>) =>
     setConfig({ ...config, sections: config.sections.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
@@ -312,7 +324,18 @@ function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Co
       </div>
 
       <div className="mt-10">
-        <p className="small-caps text-accent mb-4">Sections</p>
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <p className="small-caps text-accent">Sections</p>
+          <button
+            type="button"
+            onClick={onGenerate}
+            disabled={loading}
+            className="ml-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? "Generating..." : "Generate with AI"}
+          </button>
+        </div>
+        {error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {config.sections.map((s) => (
             <div key={s.id} className="flex items-center gap-3 border border-border rounded-sm px-4 py-3 bg-paper">
@@ -325,6 +348,7 @@ function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Co
     </section>
   );
 }
+
 
 function Field({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
   return (
