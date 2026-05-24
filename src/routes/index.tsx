@@ -253,7 +253,6 @@ function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Co
         <Field label="High school name" hint="Optional" value={config.highSchool} onChange={(v) => update({ highSchool: v })} />
       </div>
 
-     {/* TODO: Add Generate with AI button here */}
       <div className="mt-10">
         <p className="small-caps text-accent mb-4">Sections</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
