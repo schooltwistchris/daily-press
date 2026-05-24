@@ -70,6 +70,9 @@ function Index() {
     <main className="min-h-screen">
       <Hero />
       <Mockup />
+      <HowItWorks />
+      <Signup />
+      <Footer />
     </main>
   );
 }
@@ -143,3 +146,52 @@ function Mockup() {
     </section>
   );
 }
+function HowItWorks() {
+  const steps = [
+    { n: 1, title: "Design your edition", body: "Pick your publication name, sections, and visual style. Daily Press generates your starter kit." },
+    { n: 2, title: "Deploy in minutes", body: "One-click setup to GitHub Actions and Cloudflare Pages. Your edition publishes daily on its own." },
+    { n: 3, title: "AI writes the news", body: "Each morning, Claude pulls local sources and writes your day's edition. You stay in editorial control." },
+  ];
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-24 border-t border-border">
+      <p className="small-caps text-accent">How it works</p>
+      <h2 className="font-serif text-4xl md:text-5xl mt-4 tracking-tight">Three steps to a daily edition.</h2>
+      <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
+        {steps.map((s) => (
+          <div key={s.n}>
+            <div className="h-10 w-10 rounded-full bg-accent text-accent-foreground font-serif text-lg flex items-center justify-center">{s.n}</div>
+            <h3 className="font-serif text-2xl mt-6 tracking-tight">{s.title}</h3>
+            <p className="mt-3 text-muted-foreground leading-relaxed">{s.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Signup() {
+  const [email, setEmail] = useState("");
+  const [done, setDone] = useState(false);
+  return (
+    <section id="signup" className="mx-auto max-w-3xl px-6 py-24 border-t border-border text-center">
+      <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Be first to launch.</h2>
+      <p className="mt-4 text-muted-foreground text-lg">Daily Press opens this summer. Drop your email and we'll let you know.</p>
+      <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@town.com" disabled={done} className="flex-1 rounded-sm border border-border bg-paper px-4 py-3 text-sm outline-none focus:border-accent transition" />
+        <button type="button" onClick={() => { if (email.trim()) setDone(true); }} disabled={done} className="rounded-sm bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-100">
+          {done ? "You're on the list" : "Notify me"}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="mx-auto max-w-5xl px-6 pb-16">
+      <div className="h-px bg-accent/60" />
+      <p className="mt-8 text-center text-xs text-muted-foreground">Daily Press - A framework for AI-powered local journalism - Built by the team behind Medford Mercury</p>
+    </footer>
+  );
+}
+
