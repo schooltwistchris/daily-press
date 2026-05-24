@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { generateHeadlines } from "@/lib/headlines.functions";
+
 
 export const Route = createFileRoute("/")({
   component: Index,
