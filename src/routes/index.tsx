@@ -66,5 +66,96 @@ const SECTIONS: Section[] = [
 ];
 
 function Index() {
-  return <div>Sections loaded: {SECTIONS.length}</div>;
+  return (
+    <main className="min-h-screen">
+      <Hero />
+      <Mockup />
+    </main>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="mx-auto max-w-5xl px-6 pt-24 pb-20 md:pt-36 md:pb-28">
+      <p className="small-caps text-accent">For Hyperlocal Publishers</p>
+      <h1 className="font-serif mt-6 text-5xl md:text-7xl lg:text-[5.5rem] leading-[1.02] tracking-tight text-foreground">
+        Launch your town's daily paper in an afternoon.
+      </h1>
+      <p className="mt-8 max-w-2xl text-lg md:text-xl text-muted-foreground leading-relaxed">
+        Daily Press is the framework powering AI-generated hyperlocal news.
+        Design your masthead, pick your beats, deploy a daily edition that
+        writes itself.
+      </p>
+      <div className="mt-10 flex flex-wrap gap-3">
+        
+          href="https://medford-mercury.pages.dev"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center justify-center rounded-sm bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition hover:opacity-90"
+        >
+          See a live example
+        </a>
+        
+          href="#signup"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById("signup")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="inline-flex items-center justify-center rounded-sm border border-border bg-transparent px-6 py-3 text-sm font-medium text-foreground transition hover:bg-muted"
+        >
+          Get notified at launch
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function Mockup() {
+  return (
+    <section className="mx-auto max-w-5xl px-6 pb-24">
+      <div className="bg-paper px-6 py-10 md:px-14 md:py-16 shadow-[0_30px_60px_-20px_rgba(40,30,15,0.18),0_8px_20px_-8px_rgba(40,30,15,0.12)] border border-border/40">
+        <div className="text-center">
+          <div className="h-px bg-ink/80" />
+          <h2 className="font-serif font-black tracking-tight text-4xl sm:text-5xl md:text-7xl py-3 text-ink">
+            MEDFORD MERCURY
+          </h2>
+          <div className="h-px bg-ink/80" />
+          <p className="font-serif italic mt-3 text-muted-foreground">
+            Your daily local read
+          </p>
+          <p className="mt-2 text-xs tracking-wide text-muted-foreground">
+            Saturday, May 23, 2026 - Medford, Massachusetts
+          </p>
+        </div>
+
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-x-10">
+          {SECTIONS.map((s, i) => (
+            <div
+              key={s.label}
+              className={`py-6 ${i < SECTIONS.length - (SECTIONS.length % 2 === 0 ? 2 : 1) ? "border-b border-border/60" : ""} ${i % 2 === 1 ? "md:border-l md:border-border/60 md:pl-10" : ""}`}
+            >
+              <p className="small-caps text-accent mb-4">{s.label}</p>
+              <div className="space-y-5">
+                {s.items.map((it) => (
+                  <article key={it.headline}>
+                    <h3 className="font-serif text-xl md:text-2xl leading-snug text-ink">
+                      {it.headline}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {it.body}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 h-px bg-border" />
+        <p className="font-serif italic text-center text-xs text-muted-foreground mt-4">
+          Edition May 23, 2026 - published by Medford Mercury
+        </p>
+      </div>
+    </section>
+  );
 }
