@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { generateHeadlines } from "@/lib/headlines.functions";
+
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -87,19 +90,64 @@ const DEFAULT_CONFIG: Config = {
   sections: SECTIONS.map((s, i) => ({ id: String(i), templateLabel: s.label, label: s.label, enabled: true })),
 };
 
+type AiHeadlines = Record<string, { headline: string; body: string }[]>;
+
 function Index() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
+  const [aiHeadlines, setAiHeadlines] = useState<AiHeadlines | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const generate = useServerFn(generateHeadlines);
+
+  const handleGenerate = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const enabled = config.sections.filter((s) => s.enabled);
+      const labels = Array.from(new Set(enabled.map((s) => s.label || s.templateLabel)));
+      if (labels.length === 0) {
+        setError("Enable at least one section first.");
+        setLoading(false);
+        return;
+      }
+      const result = await generate({
+        data: {
+          city: config.city || "Town",
+          state: config.state,
+          pubName: config.pubName,
+          mayor: config.mayor,
+          street: config.street,
+          highSchool: config.highSchool,
+          sections: labels,
+        },
+      });
+      setAiHeadlines(result);
+    } catch (e) {
+      console.error(e);
+      setError("Could not generate headlines. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen">
       <Hero />
-      <Configurator config={config} setConfig={setConfig} />
-      <Mockup config={config} />
+      <Configurator
+        config={config}
+        setConfig={setConfig}
+        onGenerate={handleGenerate}
+        loading={loading}
+        error={error}
+      />
+      <Mockup config={config} aiHeadlines={aiHeadlines} />
       <HowItWorks />
       <Signup />
       <Footer />
     </main>
   );
 }
+
 
 function Hero() {
   return (
@@ -121,7 +169,7 @@ function Hero() {
   );
 }
 
-function Mockup({ config }: { config: Config }) {
+function Mockup({ config, aiHeadlines }: { config: Config; aiHeadlines: AiHeadlines | null }) {
   const enabledSections = config.sections.filter((s) => s.enabled);
   const pubName = (config.pubName || "Daily Press").toUpperCase();
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
@@ -145,16 +193,24 @@ function Mockup({ config }: { config: Config }) {
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-x-10">
             {enabledSections.map((s, i) => {
               const template = SECTIONS.find((t) => t.label === s.templateLabel);
-              if (!template) return null;
+              const sectionLabel = s.label || template?.label || "";
+              const aiItems = aiHeadlines?.[sectionLabel];
+              const items = aiItems && aiItems.length > 0
+                ? aiItems
+                : template?.items.map((it) => ({
+                    headline: interpolate(it.headline, config),
+                    body: interpolate(it.body, config),
+                  })) ?? [];
+              if (items.length === 0) return null;
               const isLastRow = i >= enabledSections.length - (enabledSections.length % 2 === 0 ? 2 : 1);
               return (
                 <div key={s.id} className={`py-6 ${!isLastRow ? "border-b border-border/60" : ""} ${i % 2 === 1 ? "md:border-l md:border-border/60 md:pl-10" : ""}`}>
-                  <p className="small-caps text-accent mb-4">{s.label || template.label}</p>
+                  <p className="small-caps text-accent mb-4">{sectionLabel}</p>
                   <div className="space-y-5">
-                    {template.items.map((it, j) => (
+                    {items.map((it, j) => (
                       <article key={j}>
-                        <h3 className="font-serif text-xl md:text-2xl leading-snug text-ink">{interpolate(it.headline, config)}</h3>
-                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{interpolate(it.body, config)}</p>
+                        <h3 className="font-serif text-xl md:text-2xl leading-snug text-ink">{it.headline}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{it.body}</p>
                       </article>
                     ))}
                   </div>
@@ -163,6 +219,7 @@ function Mockup({ config }: { config: Config }) {
             })}
           </div>
         )}
+
 
         <div className="mt-8 h-px bg-border" />
         <p className="font-serif italic text-center text-xs text-muted-foreground mt-4">
@@ -233,7 +290,19 @@ function interpolate(text: string, config: Config): string {
     .replaceAll("Medford", config.city || "Town");
 }
 
-function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Config) => void }) {
+function Configurator({
+  config,
+  setConfig,
+  onGenerate,
+  loading,
+  error,
+}: {
+  config: Config;
+  setConfig: (c: Config) => void;
+  onGenerate: () => void;
+  loading: boolean;
+  error: string | null;
+}) {
   const update = (patch: Partial<Config>) => setConfig({ ...config, ...patch });
   const updateSection = (id: string, patch: Partial<{ label: string; enabled: boolean }>) =>
     setConfig({ ...config, sections: config.sections.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
@@ -255,7 +324,18 @@ function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Co
       </div>
 
       <div className="mt-10">
-        <p className="small-caps text-accent mb-4">Sections</p>
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <p className="small-caps text-accent">Sections</p>
+          <button
+            type="button"
+            onClick={onGenerate}
+            disabled={loading}
+            className="ml-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? "Generating..." : "Generate with AI"}
+          </button>
+        </div>
+        {error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {config.sections.map((s) => (
             <div key={s.id} className="flex items-center gap-3 border border-border rounded-sm px-4 py-3 bg-paper">
@@ -268,6 +348,7 @@ function Configurator({ config, setConfig }: { config: Config; setConfig: (c: Co
     </section>
   );
 }
+
 
 function Field({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
   return (
