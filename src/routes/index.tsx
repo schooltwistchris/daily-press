@@ -392,10 +392,6 @@ function Configurator({
             Download as HTML
           </button>
         </div>
-          >
-            Download as HTML
-          </button>
-        </div>
         {error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {config.sections.map((s) => (
