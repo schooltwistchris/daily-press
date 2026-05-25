@@ -313,7 +313,7 @@ function Configurator({
         <Field label="Tagline" value={config.tagline} onChange={(v) => update({ tagline: v })} />
         <Field label="City" value={config.city} onChange={(v) => update({ city: v })} />
         <Field label="State" value={config.state} onChange={(v) => update({ state: v })} />
-        <Field label="Mayor's last name" hint="Optional" value={config.mayor} onChange={(v) => update({ mayor: v })} />
+        
         <Field label="Main street name" hint="Optional" value={config.street} onChange={(v) => update({ street: v })} />
         <Field label="High school name" hint="Optional" value={config.highSchool} onChange={(v) => update({ highSchool: v })} />
       </div>
