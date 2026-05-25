@@ -273,7 +273,7 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
         tagline: config.tagline || null,
         street: config.street || null,
         high_school: config.highSchool || null,
-        sections: config.sections as unknown as Record<string, unknown>[],
+        sections: config.sections as unknown as import("@/integrations/supabase/types").Json,
         has_ai_content: hasAiContent,
       });
       if (insertError) throw insertError;
