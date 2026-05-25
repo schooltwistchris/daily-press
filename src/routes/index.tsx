@@ -279,8 +279,6 @@ function interpolate(text: string, config: Config): string {
   const highSchool = config.highSchool.trim() || (config.city || "Town") + " High";
   return text
     .replaceAll("Medford City Council", (config.city || "Town") + " City Council")
-    .replaceAll("Mayor Lungo-Koehn", "Mayor " + (config.mayor || "the mayor"))
-    .replaceAll("the mayor said", (config.mayor || "the mayor") + " said")
     .replaceAll("Main Street", config.street || "Main Street")
     .replaceAll("Medford High", highSchool)
     .replaceAll("Faces of Medford", "Faces of " + (config.city || "Town"))
