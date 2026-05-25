@@ -271,7 +271,7 @@ function Footer() {
   return (
     <footer className="mx-auto max-w-5xl px-6 pb-16">
       <div className="h-px bg-accent/60" />
-      <p className="mt-8 text-center text-xs text-muted-foreground">Daily Press - A framework for AI-powered local journalism - Built by the team behind Medford Mercury</p>
+      <p className="mt-8 text-center text-xs text-muted-foreground">Daily Press - A framework for AI-powered local journalism </p>
     </footer>
   );
 }
