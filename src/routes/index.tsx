@@ -292,12 +292,14 @@ function Configurator({
   onGenerate,
   loading,
   error,
+  onDownload,
 }: {
   config: Config;
   setConfig: (c: Config) => void;
   onGenerate: () => void;
   loading: boolean;
   error: string | null;
+  onDownload: () => void;
 }) {
   const update = (patch: Partial<Config>) => setConfig({ ...config, ...patch });
   const updateSection = (id: string, patch: Partial<{ label: string; enabled: boolean }>) =>
