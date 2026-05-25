@@ -141,7 +141,7 @@ function Index() {
       />
       <Mockup config={config} aiHeadlines={aiHeadlines} />
       <HowItWorks />
-      <Signup />
+      <LaunchCTA config={config} hasAiContent={!!aiHeadlines} />
       <Footer />
     </main>
   );
