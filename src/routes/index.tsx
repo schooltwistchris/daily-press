@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { generateHeadlines } from "@/lib/headlines.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 
 export const Route = createFileRoute("/")({
@@ -140,7 +141,7 @@ function Index() {
       />
       <Mockup config={config} aiHeadlines={aiHeadlines} />
       <HowItWorks />
-      <Signup />
+      <LaunchCTA config={config} hasAiContent={!!aiHeadlines} />
       <Footer />
     </main>
   );
@@ -161,7 +162,7 @@ function Hero() {
       </p>
       <div className="mt-10 flex flex-wrap gap-3">
         <a href="https://medford-mercury.pages.dev" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-sm bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition hover:opacity-90">See a live example</a>
-        <a href="#signup" className="inline-flex items-center justify-center rounded-sm border border-border bg-transparent px-6 py-3 text-sm font-medium text-foreground transition hover:bg-muted">Get notified at launch</a>
+        <a href="#signup" className="inline-flex items-center justify-center rounded-sm border border-border bg-transparent px-6 py-3 text-sm font-medium text-foreground transition hover:bg-muted">Launch your paper</a>
       </div>
     </section>
   );
@@ -250,19 +251,70 @@ function HowItWorks() {
   );
 }
 
-function Signup() {
+function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boolean }) {
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    if (!email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const { error: insertError } = await supabase.from("launch_requests").insert({
+        email: email.trim(),
+        city: config.city || null,
+        state: config.state || null,
+        pub_name: config.pubName || null,
+        tagline: config.tagline || null,
+        street: config.street || null,
+        high_school: config.highSchool || null,
+        sections: config.sections as unknown as import("@/integrations/supabase/types").Json,
+        has_ai_content: hasAiContent,
+      });
+      if (insertError) throw insertError;
+      setDone(true);
+    } catch (e) {
+      console.error(e);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section id="signup" className="mx-auto max-w-3xl px-6 py-24 border-t border-border text-center">
-      <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Be first to launch.</h2>
-      <p className="mt-4 text-muted-foreground text-lg">Daily Press opens this summer. Drop your email and we'll let you know.</p>
-      <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@town.com" disabled={done} className="flex-1 rounded-sm border border-border bg-paper px-4 py-3 text-sm outline-none focus:border-accent transition" />
-        <button type="button" onClick={() => { if (email.trim()) setDone(true); }} disabled={done} className="rounded-sm bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-100">
-          {done ? "You're on the list" : "Notify me"}
-        </button>
-      </div>
+      <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Launch your paper.</h2>
+      <p className="mt-4 text-muted-foreground text-lg">We'll set up your daily edition. Enter your email and we'll be in touch soon.</p>
+      {done ? (
+        <p className="mt-8 text-base text-foreground">Thanks. We'll be in touch about your {config.city || "town"} edition soon.</p>
+      ) : (
+        <>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@town.com"
+              disabled={submitting}
+              className="flex-1 rounded-sm border border-border bg-paper px-4 py-3 text-sm outline-none focus:border-accent transition"
+            />
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="rounded-sm bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {submitting ? "Submitting..." : "Launch your paper"}
+            </button>
+          </div>
+          {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+        </>
+      )}
     </section>
   );
 }
@@ -322,20 +374,20 @@ function Configurator({
       </div>
 
       <div className="mt-10">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4">
           <p className="small-caps text-accent">Sections</p>
           <button
             type="button"
             onClick={onGenerate}
             disabled={loading}
-            className="ml-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="sm:ml-auto w-full sm:w-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Generating..." : "Generate with AI"}
           </button>
           <button
             type="button"
             onClick={onDownload}
-            className="rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90"
+            className="w-full sm:w-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90"
           >
             Download as HTML
           </button>
