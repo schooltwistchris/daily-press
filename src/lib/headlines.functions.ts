@@ -7,7 +7,6 @@ const InputSchema = z.object({
   city: z.string().min(1).max(100),
   state: z.string().max(100).optional().default(""),
   pubName: z.string().max(200).optional().default(""),
-  mayor: z.string().max(100).optional().default(""),
   street: z.string().max(200).optional().default(""),
   highSchool: z.string().max(200).optional().default(""),
   sections: z.array(z.string().min(1).max(100)).min(1).max(20),
