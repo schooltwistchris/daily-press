@@ -162,7 +162,7 @@ function Hero() {
       </p>
       <div className="mt-10 flex flex-wrap gap-3">
         <a href="https://medford-mercury.pages.dev" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-sm bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition hover:opacity-90">See a live example</a>
-        <a href="#signup" className="inline-flex items-center justify-center rounded-sm border border-border bg-transparent px-6 py-3 text-sm font-medium text-foreground transition hover:bg-muted">Get notified at launch</a>
+        <a href="#signup" className="inline-flex items-center justify-center rounded-sm border border-border bg-transparent px-6 py-3 text-sm font-medium text-foreground transition hover:bg-muted">Launch your paper</a>
       </div>
     </section>
   );
