@@ -113,7 +113,6 @@ function Index() {
           city: config.city || "Town",
           state: config.state,
           pubName: config.pubName,
-          mayor: config.mayor,
           street: config.street,
           highSchool: config.highSchool,
           sections: labels,
