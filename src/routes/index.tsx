@@ -374,20 +374,24 @@ function Configurator({
       </div>
 
       <div className="mt-10">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4">
           <p className="small-caps text-accent">Sections</p>
           <button
             type="button"
             onClick={onGenerate}
             disabled={loading}
-            className="ml-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="sm:ml-auto w-full sm:w-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Generating..." : "Generate with AI"}
           </button>
           <button
             type="button"
             onClick={onDownload}
-            className="rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90"
+            className="w-full sm:w-auto rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90"
+          >
+            Download as HTML
+          </button>
+        </div>
           >
             Download as HTML
           </button>
