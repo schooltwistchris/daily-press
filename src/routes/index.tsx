@@ -332,6 +332,13 @@ function Configurator({
           >
             {loading ? "Generating..." : "Generate with AI"}
           </button>
+          <button
+            type="button"
+            onClick={onDownload}
+            className="rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90"
+          >
+            Download as HTML
+          </button>
         </div>
         {error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
