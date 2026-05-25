@@ -136,6 +136,7 @@ function Index() {
         onGenerate={handleGenerate}
         loading={loading}
         error={error}
+        onDownload={() => downloadHtml(config, aiHeadlines)}
       />
       <Mockup config={config} aiHeadlines={aiHeadlines} />
       <HowItWorks />
