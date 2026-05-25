@@ -73,7 +73,6 @@ type Config = {
   tagline: string;
   city: string;
   state: string;
-  mayor: string;
   street: string;
   highSchool: string;
   sections: { id: string; templateLabel: string; label: string; enabled: boolean }[];
@@ -84,7 +83,6 @@ const DEFAULT_CONFIG: Config = {
   tagline: "Your daily local read",
   city: "Medford",
   state: "Massachusetts",
-  mayor: "Lungo-Koehn",
   street: "Main Street",
   highSchool: "Medford High",
   sections: SECTIONS.map((s, i) => ({ id: String(i), templateLabel: s.label, label: s.label, enabled: true })),
@@ -115,7 +113,6 @@ function Index() {
           city: config.city || "Town",
           state: config.state,
           pubName: config.pubName,
-          mayor: config.mayor,
           street: config.street,
           highSchool: config.highSchool,
           sections: labels,
@@ -282,8 +279,6 @@ function interpolate(text: string, config: Config): string {
   const highSchool = config.highSchool.trim() || (config.city || "Town") + " High";
   return text
     .replaceAll("Medford City Council", (config.city || "Town") + " City Council")
-    .replaceAll("Mayor Lungo-Koehn", "Mayor " + (config.mayor || "the mayor"))
-    .replaceAll("the mayor said", (config.mayor || "the mayor") + " said")
     .replaceAll("Main Street", config.street || "Main Street")
     .replaceAll("Medford High", highSchool)
     .replaceAll("Faces of Medford", "Faces of " + (config.city || "Town"))
@@ -318,7 +313,7 @@ function Configurator({
         <Field label="Tagline" value={config.tagline} onChange={(v) => update({ tagline: v })} />
         <Field label="City" value={config.city} onChange={(v) => update({ city: v })} />
         <Field label="State" value={config.state} onChange={(v) => update({ state: v })} />
-        <Field label="Mayor's last name" hint="Optional" value={config.mayor} onChange={(v) => update({ mayor: v })} />
+        
         <Field label="Main street name" hint="Optional" value={config.street} onChange={(v) => update({ street: v })} />
         <Field label="High school name" hint="Optional" value={config.highSchool} onChange={(v) => update({ highSchool: v })} />
       </div>
