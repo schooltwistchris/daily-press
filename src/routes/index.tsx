@@ -83,7 +83,6 @@ const DEFAULT_CONFIG: Config = {
   tagline: "Your daily local read",
   city: "Medford",
   state: "Massachusetts",
-  mayor: "Lungo-Koehn",
   street: "Main Street",
   highSchool: "Medford High",
   sections: SECTIONS.map((s, i) => ({ id: String(i), templateLabel: s.label, label: s.label, enabled: true })),
