@@ -34,13 +34,23 @@ export const generateHeadlines = createServerFn({ method: "POST" })
       {},
     );
 
-    const prompt = `Generate plausible local newspaper headlines for ${data.city}${data.state ? ", " + data.state : ""}.
+    const today = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "America/New_York",
+    });
+
+    const prompt = `You are writing headlines for a hyperlocal newspaper published TODAY, ${today}. Any event dates mentioned in the headlines or body must be either today or in the future relative to ${today}. Do not reference events from past months.
+
+Location: ${data.city}${data.state ? ", " + data.state : ""}.
 Publication: ${data.pubName || "the local paper"}.
-${data.mayor ? `Mayor's last name: ${data.mayor}.` : ""}
+${data.mayor ? `Suggested mayor's last name: ${data.mayor}. Treat this as a starting suggestion only — if the city above is not a New England town that plausibly matches this mayor, invent a plausible mayor name appropriate for the new city instead.` : ""}
 ${data.street ? `A main street: ${data.street}.` : ""}
 ${data.highSchool ? `The local high school: ${data.highSchool}.` : ""}
 
-For each of these sections, return exactly 2 fresh, specific, locally-plausible news items (headline + 1-2 sentence body). Be concrete: use names, numbers, dates, places. Tone: restrained editorial newspaper.
+For each of these sections, return exactly 2 fresh, specific, locally-plausible news items (headline + 1-2 sentence body). Be concrete: use names, numbers, dates, places. When you reference a date, use ${today} or a future date (e.g. "this Saturday", "next Tuesday", a specific upcoming date). Tone: restrained editorial newspaper.
 
 Sections: ${data.sections.join(", ")}
 
