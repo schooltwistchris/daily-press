@@ -45,9 +45,10 @@ export const generateHeadlines = createServerFn({ method: "POST" })
 
 Location: ${data.city}${data.state ? ", " + data.state : ""}.
 Publication: ${data.pubName || "the local paper"}.
-${data.mayor ? `Suggested mayor's last name: ${data.mayor}. Treat this as a starting suggestion only — if the city above is not a New England town that plausibly matches this mayor, invent a plausible mayor name appropriate for the new city instead.` : ""}
 ${data.street ? `A main street: ${data.street}.` : ""}
 ${data.highSchool ? `The local high school: ${data.highSchool}.` : ""}
+
+For headlines about local government, use the correct form of government for the city specified (e.g., mayor for cities like Boston, town administrator and select board for many Massachusetts towns, city manager for council-manager cities). Invent a plausible name for whoever holds that role. Match the title to the actual form of government in the city — do not call someone "Mayor" in a town that uses a Town Administrator system.
 
 For each of these sections, return exactly 2 fresh, specific, locally-plausible news items (headline + 1-2 sentence body). Be concrete: use names, numbers, dates, places. When you reference a date, use ${today} or a future date (e.g. "this Saturday", "next Tuesday", a specific upcoming date). Tone: restrained editorial newspaper.
 
