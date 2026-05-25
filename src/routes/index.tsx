@@ -136,6 +136,7 @@ function Index() {
         onGenerate={handleGenerate}
         loading={loading}
         error={error}
+        onDownload={() => downloadHtml(config, aiHeadlines)}
       />
       <Mockup config={config} aiHeadlines={aiHeadlines} />
       <HowItWorks />
@@ -291,12 +292,14 @@ function Configurator({
   onGenerate,
   loading,
   error,
+  onDownload,
 }: {
   config: Config;
   setConfig: (c: Config) => void;
   onGenerate: () => void;
   loading: boolean;
   error: string | null;
+  onDownload: () => void;
 }) {
   const update = (patch: Partial<Config>) => setConfig({ ...config, ...patch });
   const updateSection = (id: string, patch: Partial<{ label: string; enabled: boolean }>) =>
@@ -329,6 +332,13 @@ function Configurator({
           >
             {loading ? "Generating..." : "Generate with AI"}
           </button>
+          <button
+            type="button"
+            onClick={onDownload}
+            className="rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:opacity-90"
+          >
+            Download as HTML
+          </button>
         </div>
         {error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -356,5 +366,111 @@ function Field({ label, value, onChange, hint }: { label: string; value: string;
     </label>
   );
 }
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function slugify(s: string): string {
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "edition";
+}
+
+function downloadHtml(config: Config, aiHeadlines: AiHeadlines | null) {
+  const enabledSections = config.sections.filter((s) => s.enabled);
+  const pubName = (config.pubName || "Daily Press").toUpperCase();
+  const now = new Date();
+  const today = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  const ymd = now.toISOString().slice(0, 10);
+  const cityState = [config.city, config.state].filter(Boolean).join(", ");
+
+  const sectionsHtml = enabledSections.map((s) => {
+    const template = SECTIONS.find((t) => t.label === s.templateLabel);
+    const sectionLabel = s.label || template?.label || "";
+    const aiItems = aiHeadlines?.[sectionLabel];
+    const items = aiItems && aiItems.length > 0
+      ? aiItems
+      : template?.items.map((it) => ({
+          headline: interpolate(it.headline, config),
+          body: interpolate(it.body, config),
+        })) ?? [];
+    if (items.length === 0) return "";
+    const articles = items.map((it) => `
+      <article>
+        <h3>${escapeHtml(it.headline)}</h3>
+        <p>${escapeHtml(it.body)}</p>
+      </article>`).join("");
+    return `
+      <div class="section">
+        <p class="section-label">${escapeHtml(sectionLabel)}</p>
+        ${articles}
+      </div>`;
+  }).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>${escapeHtml(config.pubName || "Daily Press")} — ${escapeHtml(today)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #ebe6dc; font-family: 'Inter', system-ui, sans-serif; color: #2b2620; padding: 40px 16px; }
+  .paper { max-width: 960px; margin: 0 auto; background: #faf7f2; padding: 40px 24px; border: 1px solid rgba(40,30,15,0.1); box-shadow: 0 30px 60px -20px rgba(40,30,15,0.18), 0 8px 20px -8px rgba(40,30,15,0.12); }
+  @media (min-width: 768px) { .paper { padding: 64px 56px; } }
+  .masthead { text-align: center; }
+  .rule { height: 1px; background: rgba(43,38,32,0.8); }
+  .masthead h1 { font-family: 'Playfair Display', serif; font-weight: 900; letter-spacing: -0.02em; font-size: 40px; margin: 12px 0; color: #2b2620; }
+  @media (min-width: 768px) { .masthead h1 { font-size: 72px; } }
+  .tagline { font-family: 'Playfair Display', serif; font-style: italic; margin-top: 12px; color: #6b6358; }
+  .dateline { margin-top: 8px; font-size: 12px; letter-spacing: 0.05em; color: #6b6358; }
+  .grid { margin-top: 40px; display: grid; grid-template-columns: 1fr; column-gap: 40px; }
+  @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .section { padding: 24px 0; border-bottom: 1px solid rgba(40,30,15,0.15); }
+  @media (min-width: 768px) { .grid > .section:nth-child(even) { border-left: 1px solid rgba(40,30,15,0.15); padding-left: 40px; } }
+  .section-label { font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.15em; font-size: 11px; color: #7a8a6b; margin: 0 0 16px; font-weight: 500; }
+  article { margin-bottom: 20px; }
+  article h3 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; line-height: 1.25; margin: 0; color: #2b2620; }
+  @media (min-width: 768px) { article h3 { font-size: 26px; } }
+  article p { margin: 8px 0 0; font-size: 14px; line-height: 1.6; color: #6b6358; }
+  .footer-rule { height: 1px; background: rgba(40,30,15,0.15); margin-top: 32px; }
+  .footer { font-family: 'Playfair Display', serif; font-style: italic; text-align: center; font-size: 12px; color: #6b6358; margin-top: 16px; }
+</style>
+</head>
+<body>
+  <div class="paper">
+    <div class="masthead">
+      <div class="rule"></div>
+      <h1>${escapeHtml(pubName)}</h1>
+      <div class="rule"></div>
+      <p class="tagline">${escapeHtml(config.tagline || "Your daily local read")}</p>
+      <p class="dateline">${escapeHtml(today)}${cityState ? " — " + escapeHtml(cityState) : ""}</p>
+    </div>
+    <div class="grid">${sectionsHtml}
+    </div>
+    <div class="footer-rule"></div>
+    <p class="footer">Edition ${escapeHtml(today)} — published by ${escapeHtml(config.pubName || "Daily Press")}</p>
+  </div>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${slugify(config.pubName || "edition")}-${ymd}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 
 
