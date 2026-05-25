@@ -73,7 +73,6 @@ type Config = {
   tagline: string;
   city: string;
   state: string;
-  mayor: string;
   street: string;
   highSchool: string;
   sections: { id: string; templateLabel: string; label: string; enabled: boolean }[];
