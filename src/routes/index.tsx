@@ -442,8 +442,24 @@ function Configurator({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {config.sections.map((s) => (
             <div key={s.id} className="flex items-center gap-3 border border-border rounded-sm px-4 py-3 bg-paper">
-              <input type="checkbox" checked={s.enabled} onChange={(e) => updateSection(s.id, { enabled: e.target.checked })} className="h-4 w-4" />
-              <input type="text" value={s.label} onChange={(e) => updateSection(s.id, { label: e.target.value })} disabled={!s.enabled} className="flex-1 bg-transparent text-sm outline-none disabled:opacity-50" />
+              <input
+                id={`section-enabled-${s.id}`}
+                type="checkbox"
+                checked={s.enabled}
+                onChange={(e) => updateSection(s.id, { enabled: e.target.checked })}
+                aria-label={`Enable ${s.label || s.templateLabel} section`}
+                className="h-4 w-4"
+              />
+              <label htmlFor={`section-label-${s.id}`} className="sr-only">{s.templateLabel} section label</label>
+              <input
+                id={`section-label-${s.id}`}
+                type="text"
+                value={s.label}
+                onChange={(e) => updateSection(s.id, { label: e.target.value })}
+                disabled={!s.enabled}
+                aria-label={`${s.templateLabel} section label`}
+                className="flex-1 bg-transparent text-sm outline-none disabled:opacity-50"
+              />
             </div>
           ))}
         </div>
