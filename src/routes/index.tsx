@@ -338,12 +338,15 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
           <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Launch your paper.</h2>
           <p className="mt-4 text-muted-foreground text-lg">We'll set up your daily edition. Enter your email and we'll send you a link to continue.</p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <label htmlFor="launch-email" className="sr-only">Email address</label>
             <input
+              id="launch-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@town.com"
               disabled={submitting}
+              aria-label="Email address"
               className="flex-1 rounded-sm border border-border bg-paper px-4 py-3 text-sm outline-none focus:border-accent transition"
             />
             <button
