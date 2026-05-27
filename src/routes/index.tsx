@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { generateHeadlines } from "@/lib/headlines.functions";
-import { supabase } from "@/integrations/supabase/client";
+import { publisherSupabase } from "@/integrations/publisher/client";
 
 
 export const Route = createFileRoute("/")({
@@ -265,7 +265,7 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
     setSubmitting(true);
     setError(null);
     try {
-      const { error: insertError } = await supabase.from("launch_requests").insert({
+      const { error: insertError } = await publisherSupabase.from("launch_requests").insert({
         email: email.trim(),
         city: config.city || null,
         state: config.state || null,
@@ -273,7 +273,7 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
         tagline: config.tagline || null,
         street: config.street || null,
         high_school: config.highSchool || null,
-        sections: config.sections as unknown as import("@/integrations/supabase/types").Json,
+        sections: config.sections,
         has_ai_content: hasAiContent,
       });
       if (insertError) throw insertError;
