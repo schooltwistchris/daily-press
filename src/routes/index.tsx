@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { generateHeadlines } from "@/lib/headlines.functions";
 import { publisherSupabase } from "@/integrations/publisher/client";
@@ -338,12 +338,15 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
           <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Launch your paper.</h2>
           <p className="mt-4 text-muted-foreground text-lg">We'll set up your daily edition. Enter your email and we'll send you a link to continue.</p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <label htmlFor="launch-email" className="sr-only">Email address</label>
             <input
+              id="launch-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@town.com"
               disabled={submitting}
+              aria-label="Email address"
               className="flex-1 rounded-sm border border-border bg-paper px-4 py-3 text-sm outline-none focus:border-accent transition"
             />
             <button
@@ -439,8 +442,24 @@ function Configurator({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {config.sections.map((s) => (
             <div key={s.id} className="flex items-center gap-3 border border-border rounded-sm px-4 py-3 bg-paper">
-              <input type="checkbox" checked={s.enabled} onChange={(e) => updateSection(s.id, { enabled: e.target.checked })} className="h-4 w-4" />
-              <input type="text" value={s.label} onChange={(e) => updateSection(s.id, { label: e.target.value })} disabled={!s.enabled} className="flex-1 bg-transparent text-sm outline-none disabled:opacity-50" />
+              <input
+                id={`section-enabled-${s.id}`}
+                type="checkbox"
+                checked={s.enabled}
+                onChange={(e) => updateSection(s.id, { enabled: e.target.checked })}
+                aria-label={`Enable ${s.label || s.templateLabel} section`}
+                className="h-4 w-4"
+              />
+              <label htmlFor={`section-label-${s.id}`} className="sr-only">{s.templateLabel} section label</label>
+              <input
+                id={`section-label-${s.id}`}
+                type="text"
+                value={s.label}
+                onChange={(e) => updateSection(s.id, { label: e.target.value })}
+                disabled={!s.enabled}
+                aria-label={`${s.templateLabel} section label`}
+                className="flex-1 bg-transparent text-sm outline-none disabled:opacity-50"
+              />
             </div>
           ))}
         </div>
@@ -451,14 +470,16 @@ function Configurator({
 
 
 function Field({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
+  const reactId = useId();
+  const inputId = `field-${reactId}`;
   return (
-    <label className="block">
-      <span className="block text-sm font-medium text-foreground mb-1.5">
+    <div className="block">
+      <label htmlFor={inputId} className="block text-sm font-medium text-foreground mb-1.5">
         {label}
         {hint ? <span className="ml-2 text-xs font-normal text-muted-foreground">{hint}</span> : null}
-      </span>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-sm border border-border bg-paper px-4 py-2.5 text-sm outline-none focus:border-accent transition" />
-    </label>
+      </label>
+      <input id={inputId} type="text" value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} className="w-full rounded-sm border border-border bg-paper px-4 py-2.5 text-sm outline-none focus:border-accent transition" />
+    </div>
   );
 }
 
