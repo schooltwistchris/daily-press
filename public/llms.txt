@@ -1,0 +1,7 @@
+# Daily Press
+
+> Daily Press is a framework for launching AI-generated hyperlocal daily newspapers. Design your masthead, pick your beats, and deploy a daily edition that writes itself.
+
+## Pages
+
+- [Home](/): Configure your paper, preview a live mockup, and request access to launch your edition.
