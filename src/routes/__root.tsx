@@ -72,6 +72,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "u8HkY5hRGI4nUqPQtbQoBqhZqhrt5KqeCXTCgT8hOKk" },
       { title: "Daily Press — Hyperlocal newspapers, on autopilot." },
       { name: "description", content: "Daily Press is a framework for launching AI-generated hyperlocal daily newspapers. Design your masthead and beats to deploy a daily edition that writes itself." },
       { name: "author", content: "Daily Press" },
