@@ -470,7 +470,7 @@ function Configurator({
 
 
 function Field({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
-  const reactId = React.useId();
+  const reactId = useId();
   const inputId = `field-${reactId}`;
   return (
     <div className="block">
