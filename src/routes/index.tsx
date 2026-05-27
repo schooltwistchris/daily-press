@@ -5,7 +5,38 @@ import { generateHeadlines } from "@/lib/headlines.functions";
 import { publisherSupabase } from "@/integrations/publisher/client";
 
 
+const SITE_URL = "https://local-press-power.lovable.app";
+
+const STRUCTURED_DATA = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Daily Press",
+      url: SITE_URL,
+      description:
+        "Daily Press is a framework for launching AI-generated hyperlocal daily newspapers.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: "Daily Press",
+      url: SITE_URL,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
+});
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: STRUCTURED_DATA,
+      },
+    ],
+  }),
   component: Index,
 });
 
