@@ -470,14 +470,16 @@ function Configurator({
 
 
 function Field({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
+  const reactId = React.useId();
+  const inputId = `field-${reactId}`;
   return (
-    <label className="block">
-      <span className="block text-sm font-medium text-foreground mb-1.5">
+    <div className="block">
+      <label htmlFor={inputId} className="block text-sm font-medium text-foreground mb-1.5">
         {label}
         {hint ? <span className="ml-2 text-xs font-normal text-muted-foreground">{hint}</span> : null}
-      </span>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-sm border border-border bg-paper px-4 py-2.5 text-sm outline-none focus:border-accent transition" />
-    </label>
+      </label>
+      <input id={inputId} type="text" value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} className="w-full rounded-sm border border-border bg-paper px-4 py-2.5 text-sm outline-none focus:border-accent transition" />
+    </div>
   );
 }
 
