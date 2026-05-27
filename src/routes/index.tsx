@@ -255,10 +255,15 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const trimmedEmail = email.trim();
+  const pubLabel = config.pubName?.trim() || config.city?.trim();
+  const paperLabel = pubLabel ? `${pubLabel} paper` : "your paper";
+
   const handleSubmit = async () => {
-    if (!email.trim()) {
+    if (!trimmedEmail) {
       setError("Please enter your email.");
       return;
     }
@@ -266,7 +271,7 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
     setError(null);
     try {
       const { error: insertError } = await publisherSupabase.from("launch_requests").insert({
-        email: email.trim(),
+        email: trimmedEmail,
         city: config.city || null,
         state: config.state || null,
         pub_name: config.pubName || null,
@@ -277,6 +282,21 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
         has_ai_content: hasAiContent,
       });
       if (insertError) throw insertError;
+
+      // Row saved — try to send a magic link. Don't gate success on this.
+      try {
+        const { error: otpError } = await publisherSupabase.auth.signInWithOtp({
+          email: trimmedEmail,
+          options: {
+            emailRedirectTo: "https://daily-press-publisher.lovable.app/welcome",
+          },
+        });
+        if (otpError) throw otpError;
+        setMagicLinkSent(true);
+      } catch (otpErr) {
+        console.error("signInWithOtp failed", otpErr);
+        setMagicLinkSent(false);
+      }
       setDone(true);
     } catch (e) {
       console.error(e);
@@ -288,12 +308,35 @@ function LaunchCTA({ config, hasAiContent }: { config: Config; hasAiContent: boo
 
   return (
     <section id="signup" className="mx-auto max-w-3xl px-6 py-24 border-t border-border text-center">
-      <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Launch your paper.</h2>
-      <p className="mt-4 text-muted-foreground text-lg">We'll set up your daily edition. Enter your email and we'll be in touch soon.</p>
       {done ? (
-        <p className="mt-8 text-base text-foreground">Thanks. We'll be in touch about your {config.city || "town"} edition soon.</p>
+        magicLinkSent ? (
+          <>
+            <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Check your email.</h2>
+            <p className="mt-4 text-muted-foreground text-lg">
+              We sent a link to {trimmedEmail} to set up your {paperLabel}. Open it from your email to continue.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="font-serif text-4xl md:text-5xl tracking-tight">We saved your paper.</h2>
+            <p className="mt-4 text-muted-foreground text-lg">
+              Visit{" "}
+              <a
+                href="https://daily-press-publisher.lovable.app"
+                className="underline hover:text-foreground"
+                target="_blank"
+                rel="noreferrer"
+              >
+                daily-press-publisher.lovable.app
+              </a>{" "}
+              to set it up — sign in with the same email.
+            </p>
+          </>
+        )
       ) : (
         <>
+          <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Launch your paper.</h2>
+          <p className="mt-4 text-muted-foreground text-lg">We'll set up your daily edition. Enter your email and we'll send you a link to continue.</p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
